@@ -5,8 +5,6 @@ import evernote.edam.error.ttypes as Errors
 import evernote.edam.notestore.ttypes as UserStoreTypes
 import time
 import socket
-import subprocess
-import re
 
 # standard makeNote method:
 def makeNote(authToken, noteStore, noteTitle, noteBody, parentNotebook=None):
@@ -23,8 +21,6 @@ def makeNote(authToken, noteStore, noteTitle, noteBody, parentNotebook=None):
 	## parentNotebook is optional; if omitted, default notebook is used
 	if parentNotebook and hasattr(parentNotebook, 'guid'):
 		ourNote.notebookGuid = parentNotebook.guid
-	#if parentNotebook and hasattr(parentNotebook, 'name'):
-	#	ourNote.notebookGuid = parentNotebook.name
 
 	## Attempt to create note in Evernote account
 	try:
