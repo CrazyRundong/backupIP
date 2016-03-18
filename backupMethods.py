@@ -126,3 +126,4 @@ def getIPandName():
 	localIPv6 = IPv6Info[1][4][0]
 
 	return localIPv4, localIPv6, pcName
+# seems that version control failed...
