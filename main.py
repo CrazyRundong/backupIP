@@ -62,4 +62,3 @@ else:
 		print 'Successfully update your IP'
 	else:
 		print 'Update failed'
-# seems that version control failed...
