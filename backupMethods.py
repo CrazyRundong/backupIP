@@ -39,15 +39,10 @@ def makeNote(authToken, noteStore, noteTitle, noteBody, parentNotebook=None):
 	return note
 
 # standard updateNote methods:
-def updateNote(authToken, noteStore, oldNote, newNote):
-	# Check if two notes get same guid:
-	if oldNote.guid != newNote.guid:
-		print 'Refreshed notes should get same guid!'
-		return None
-
-	# Error shoot:
+def updateNote(authToken, noteStore, oldNote, noteBody, cacheOldIP = False):
+	# get Note with content:
 	try:
-		newNote = noteStore.updateNote(authToken, newNote)
+		existNote = noteStore.getNote(authToken, oldNote.guid, True, False, False, False)
 	except Errors.EDAMUserException, edue:
 		## Something was wrong with the note data
 		## See EDAMErrorCode enumeration for error code explanation
@@ -61,7 +56,35 @@ def updateNote(authToken, noteStore, oldNote, newNote):
 	except Errors.EDAMSystemException, edue:
 		print 'EDAMSystemException:', edue
 		return None
-	return newNote
+
+	# you can determine cache old IP log via argument cacheOldIP
+	if cacheOldIP:
+		# update IP Note content:
+		# delete exist '</en-note>' and append new noteBody:
+		existNote.content = existNote.content[:-10] + noteBody + '</en-note>'
+	else:
+		# don't cache IP log as default:
+		existNote.content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		existNote.content += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+		existNote.content += "<en-note>%s</en-note>" % noteBody
+
+	# update IP Note and return it:
+	try:
+		existNote = noteStore.updateNote(authToken, existNote)
+	except Errors.EDAMUserException, edue:
+		## Something was wrong with the note data
+		## See EDAMErrorCode enumeration for error code explanation
+		## http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+		print "EDAMUserException:", edue
+		return None
+	except Errors.EDAMNotFoundException, ednfe:
+		## Parent Notebook GUID doesn't correspond to an actual notebook
+		print "EDAMNotFoundException: Invalid parent notebook GUID"
+		return None
+	except Errors.EDAMSystemException, edue:
+		print 'EDAMSystemException:', edue
+		return None
+	return existNote
 
 # Search a note in a specific notebook:
 def searchNote(authToken, noteStore, keyWord, noteBook):

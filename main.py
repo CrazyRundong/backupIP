@@ -27,6 +27,7 @@ ipGUID = 'IP address'; IPNotebook = None
 for element in note_store.listNotebooks():
 	if element.name == ipGUID:
 		IPNotebook = element
+		print 'Find exist IP Notebook: %s' % IPNotebook.guid
 # if ipGUID not in notebookNames:
 if not IPNotebook:
 	IPNotebook = Types.Notebook()
@@ -48,16 +49,16 @@ for element in noteFindList.notes:
 		ipNote = element
 		print 'Find a IPNote: %s\nGUID: %s' % (ipNote.title, ipNote.guid)
 if not ipNote.title:
-	if makeNote(auth_token, note_store, noteTitle, noteBody, IPNotebook):
-		print 'Successfully backup your IP'
+	# no exist IP Note: create a new Note
+	ipNote = makeNote(auth_token, note_store, noteTitle, noteBody, IPNotebook)
+	if ipNote:
+		print 'Successfully backup your IP in a new Note:\n %s' % ipNote.guid
 	else:
 		print 'Backup failed'
 else:
-	nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-	nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-	nBody += "<en-note>%s</en-note>" % noteBody
-	ipNote.content = nBody
-	if updateNote(auth_token, note_store, ipNote, ipNote):
+	# do exist a IP Note: update its content
+	# don't cache IP log as default:
+	if updateNote(auth_token, note_store, ipNote, noteBody, cacheOldIP = False):
 		print 'Successfully update your IP'
 	else:
 		print 'Update failed'
